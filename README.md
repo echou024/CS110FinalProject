@@ -1,4 +1,4 @@
-# Assignment4 Concentrator
+# Lab 7 - Chatroom
 
 ## Project Description
 <!-- you can include known bugs, design decisions, external references used... -->
