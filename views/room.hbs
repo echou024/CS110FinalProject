@@ -1,0 +1,84 @@
+<h1>{{roomName}}</h1>
+<div id="messages">
+  {{#each messages}}
+    <div>
+      <strong>{{this.nickname}}</strong>: {{this.message}} ({{formatDate this.timestamp}})
+    </div>
+  {{/each}}
+</div>
+<input type="text" id="nickname" placeholder="Enter your nickname">
+<input type="text" id="message" placeholder="Enter your message">
+<button id="send">Send</button>
+
+<script>
+  const roomName = '{{roomName}}';
+  const messagesContainer = document.getElementById('messages');
+  const nicknameInput = document.getElementById('nickname');
+  const messageInput = document.getElementById('message');
+  const sendButton = document.getElementById('send');
+
+  let nickname;
+
+  function formatDate(date) {
+    // Format date using moment.js or your preferred method
+    return new Date(date).toLocaleString();
+  }
+
+  function fetchMessages() {
+    fetch(`/${roomName}/messages`)
+      .then(response => response.json())
+      .then(messages => {
+        messagesContainer.innerHTML = '';
+        messages.forEach(message => {
+          const messageElement = document.createElement('div');
+          messageElement.innerHTML = `<strong>${message.nickname}</strong>: ${message.message} (${formatDate(message.timestamp)})`;
+          messagesContainer.appendChild(messageElement);
+        });
+      })
+      .catch(error => console.error(error));
+  }
+
+  function sendMessage() {
+    if (!nickname) {
+      nickname = nicknameInput.value.trim();
+      if (!nickname) {
+        alert('Please enter a nickname');
+        return;
+      }
+    }
+
+    const message = messageInput.value.trim();
+    if (!message) {
+      alert('Please enter a message');
+      return;
+    }
+
+    fetch(`/${roomName}/messages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ nickname, message })
+    })
+      .then(response => response.json())
+      .then(messages => {
+        messagesContainer.innerHTML = '';
+        messages.forEach(message => {
+          const messageElement = document.createElement('div');
+          messageElement.innerHTML = `<strong>${message.nickname}</strong>: ${message.message} (${formatDate(message.timestamp)})`;
+          messagesContainer.appendChild(messageElement);
+        });
+        messageInput.value = '';
+      })
+      .catch(error => console.error(error));
+  }
+
+  sendButton.addEventListener('click', sendMessage);
+  messageInput.addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+      sendMessage();
+    }
+  });
+
+  setInterval(fetchMessages, 3000); // Refresh messages every 3 seconds
+</script>
